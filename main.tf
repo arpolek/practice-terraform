@@ -30,7 +30,7 @@ resource "aws_security_group" "security_group" {
 }
 
 variable "security_group_name" {
-    description = "terraform-security-group-2"
+    description = "terraform-security-group-4"
     type = string
-    default = "terraform-security-group-2"
+    default = "terraform-security-group-4"
 }
