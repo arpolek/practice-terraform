@@ -2,7 +2,7 @@ provider "aws" {
     region = "eu-central-1"
 }
 
-resource "aws_instance" "webserver8080" {
+resource "aws_instance" "webserver" {
     ami = "ami-0e63910157459607d"
     instance_type = "t2.micro"
     vpc_security_group_ids = ["${aws_security_group.security_group.id}"]
