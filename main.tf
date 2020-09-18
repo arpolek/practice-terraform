@@ -77,7 +77,7 @@ variable "sec_group_name" {
 
 resource "aws_autoscaling_group" "webserver-cluster" {
     launch_configuration = aws_launch_configuration.cluster-launch-config.id
-    availability_zones = ["${data.aws_availability_zones.all.names}"]
+    availability_zones = ["${data.aws_availability_zones.available.names}"]
 
     load_balancers = ["${aws_elb.load-balancer.name}"]
     health_check_type = "ELB"
@@ -94,7 +94,7 @@ resource "aws_autoscaling_group" "webserver-cluster" {
 
 resource "aws_elb" "load-balancer" {
     name = "load-balancer"
-    availability_zones = ["${data.aws_availability_zones.all.names[0]}"]
+    availability_zones = ["${data.aws_availability_zones.available.names}"]
     security_groups = ["${aws_security_group.sec-group-elb.id}"]
     
     listener {
