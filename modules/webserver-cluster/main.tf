@@ -25,7 +25,7 @@ resource "aws_security_group" "security_group" {
 
 resource "aws_launch_configuration" "launch-configuration" {
     image_id = "ami-0e63910157459607d"
-    instance_type = "t2.micro"
+    instance_type = "${instance_type}"
     security_groups = ["${aws_security_group.security_group.id}"]
 
     user_data = <<-EOF
@@ -46,12 +46,12 @@ resource "aws_autoscaling_group" "autoscaling-group" {
     load_balancers = ["${aws_elb.elb.name}"]
     health_check_type = "ELB"
 
-    min_size = 2
-    max_size = 2
+    min_size = ${min_size}
+    max_size = ${max_size}
 
     tag {
         key = "Name"
-        value = "terraform-asg"
+        value = "${var.cluster_name}-terraform-asg"
         propagate_at_launch = true
     }
 }
