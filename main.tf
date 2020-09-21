@@ -12,6 +12,21 @@ variable "port" {
     type = string
 }
 
+resource "aws_security_group" "security_group" {
+    name = "terraform-security-group-4"
+
+    ingress {
+        from_port = var.port
+        to_port = var.port
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    lifecycle {
+        create_before_destroy = true
+    }
+}
+
 ############## start of single web server config ##############
 /*
 resource "aws_instance" "webserver" {
@@ -30,37 +45,20 @@ resource "aws_instance" "webserver" {
     }
 }
 
-resource "aws_security_group" "security_group" {
-    name = var.security_group_name
-
-    ingress {
-        from_port = var.port
-        to_port = var.port
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-}
-
-variable "security_group_name" {
-    description = "terraform-security-group-4"
-    type = string
-    default = "terraform-security-group-4"
-}
-
 output "public_ip-webserver" {
     value = "${aws_instance.webserver.public_ip}"
 }
 */
-############## start of cluster of webservers ##############
+############## start of cluster of web servers config ##############
 
-resource "aws_launch_configuration" "cluster-launch-config" {
+resource "aws_launch_configuration" "launch-configuration" {
     image_id = "ami-0e63910157459607d"
     instance_type = "t2.micro"
-    security_groups = ["${var.sec_group_name}"]
+    security_groups = ["${aws_security_group.security_group.id}"]
 
     user_data = <<-EOF
                 #!/bin/bash
-                echo "cluster of web servers, currently responds <web server public ip >"
+                echo "web server" > index.html
                 nohup busybox httpd -f -p "${var.port}" &
                 EOF
 
@@ -69,17 +67,11 @@ resource "aws_launch_configuration" "cluster-launch-config" {
     }
 }
 
-variable "sec_group_name" {
-    description = "security group of a cluster of web servers"
-    default = "terraform-sec-group-cluster"
-    type = string
-}
+resource "aws_autoscaling_group" "autoscaling-group" {
+    launch_configuration = aws_launch_configuration.launch-configuration.id
+    availability_zones = data.aws_availability_zones.available.names
 
-resource "aws_autoscaling_group" "webserver-cluster" {
-    launch_configuration = aws_launch_configuration.cluster-launch-config.id
-    availability_zones = ["${data.aws_availability_zones.available.names}"]
-
-    load_balancers = ["${aws_elb.load-balancer.name}"]
+    load_balancers = ["${aws_elb.elb.name}"]
     health_check_type = "ELB"
 
     min_size = 2
@@ -87,21 +79,21 @@ resource "aws_autoscaling_group" "webserver-cluster" {
 
     tag {
         key = "Name"
-        value = "terraform-asg-webservers-cluster"
+        value = "terraform-asg"
         propagate_at_launch = true
     }
 }
 
-resource "aws_elb" "load-balancer" {
-    name = "load-balancer"
-    availability_zones = ["${data.aws_availability_zones.available.names}"]
-    security_groups = ["${aws_security_group.sec-group-elb.id}"]
-    
+resource "aws_elb" "elb" {
+    name = "terraform-asg"
+    availability_zones = data.aws_availability_zones.available.names
+    security_groups = ["${aws_security_group.security-group-elb.id}"]
+
     listener {
         lb_port = 80
-        lb_protocol = "http"
+        lb_protocol = "HTTP"
         instance_port = var.port
-        instance_protocol = "http"
+        instance_protocol = "HTTP"
     }
 
     health_check {
@@ -109,12 +101,12 @@ resource "aws_elb" "load-balancer" {
         unhealthy_threshold = 2
         timeout = 3
         interval = 30
-        target = "HTTP:${var.port}"
+        target = "HTTP:${var.port}/"
     }
 }
 
-resource "aws_security_group" "sec-group-elb" {
-    name = var.elb_sec_group_name
+resource "aws_security_group" "security-group-elb" {
+    name = "security-group-elb"
 
     ingress {
         from_port = 80
@@ -131,12 +123,6 @@ resource "aws_security_group" "sec-group-elb" {
     }
 }
 
-variable "elb_sec_group_name" {
-    description = "ELB security group"
-    default = "elb-security-group"
-    type = string
-}
-
-output "ELB_DNS_name" {
-    value = "${aws_elb.load-balancer.dns_name}"
+output "elb_dns_name" {
+    value = "${aws_elb.elb.dns_name}"
 }
