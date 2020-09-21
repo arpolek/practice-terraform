@@ -9,7 +9,7 @@ variable "port" {
 }
 
 resource "aws_security_group" "security_group" {
-    name = "terraform-security-group-4"
+    name = "${var.cluster_name}-terraform-security-group-4"
 
     ingress {
         from_port = var.port
@@ -57,7 +57,7 @@ resource "aws_autoscaling_group" "autoscaling-group" {
 }
 
 resource "aws_elb" "elb" {
-    name = "terraform-asg"
+    name = "${var.cluster_name}-terraform-asg"
     availability_zones = data.aws_availability_zones.available.names
     security_groups = ["${aws_security_group.security-group-elb.id}"]
 
@@ -78,7 +78,7 @@ resource "aws_elb" "elb" {
 }
 
 resource "aws_security_group" "security-group-elb" {
-    name = "security-group-elb"
+    name = "${var.cluster_name}-security-group-elb"
 
     ingress {
         from_port = 80

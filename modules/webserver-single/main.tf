@@ -5,7 +5,7 @@ variable "port" {
 }
 
 resource "aws_security_group" "security_group" {
-    name = "terraform-security-group-4"
+    name = "${var.single_webserver_name}-terraform-security-group-4"
 
     ingress {
         from_port = var.port
@@ -31,7 +31,7 @@ resource "aws_instance" "webserver" {
                 EOF
     
     tags = {
-        Name = "terraform-webserver"
+        Name = "${var.single_webserver_name}-terraform-webserver"
     }
 }
 
