@@ -7,9 +7,13 @@ variable "instance_type" {
 }
 
 variable "min_size" {
-    description "min size of a cluster"
+    description = "min size of a cluster"
 }
 
-variable "max size" {
+variable "max_size" {
     description = "max size of a cluster"
+}
+
+variable "launch_configuration_name" {
+    description = "name of a launch configuration"
 }
