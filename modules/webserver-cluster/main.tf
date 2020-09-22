@@ -24,9 +24,9 @@ resource "aws_security_group" "security_group" {
 }
 
 resource "aws_launch_configuration" "launch-configuration" {
-    name = "${launch_configuration_name}-launch-configuration"
     image_id = "ami-0e63910157459607d"
-    instance_type = "${instance_type}"
+    name = "${var.launch_configuration_name}-launch-configuration"
+    instance_type = "${var.instance_type}"
     security_groups = ["${aws_security_group.security_group.id}"]
 
     user_data = <<-EOF
@@ -47,8 +47,8 @@ resource "aws_autoscaling_group" "autoscaling-group" {
     load_balancers = ["${aws_elb.elb.name}"]
     health_check_type = "ELB"
 
-    min_size = "${min_size}"
-    max_size = "${max_size}"
+    min_size = "${var.min_size}"
+    max_size = "${var.max_size}"
 
     tag {
         key = "Name"
@@ -58,7 +58,7 @@ resource "aws_autoscaling_group" "autoscaling-group" {
 }
 
 resource "aws_elb" "elb" {
-    name = "${var.cluster_name}-terraform-asg"
+    name = "${var.cluster_name}-asg"
     availability_zones = data.aws_availability_zones.available.names
     security_groups = ["${aws_security_group.security-group-elb.id}"]
 
