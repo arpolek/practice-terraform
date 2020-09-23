@@ -10,3 +10,25 @@ module "webserver_cluster" {
   min_size = 2
   max_size = 2
 }
+
+resource "aws_autoscaling_schedule" "scale_business_hours" {
+  scheduled_action_name = "scale-out-during-business-hours"
+  min_size              = 2
+  max_size              = 3
+  desired_capacity      = 2
+  recurrence            = "0 9 * * *"
+
+  autoscaling_group_name = "${module.webserver_cluster.asg_name}"
+}
+
+resource "aws_autoscaling_schedule" "scale_at_night" {
+  scheduled_action_name = "scale-out-during-business-hours"
+  min_size              = 2
+  max_size              = 3
+  desired_capacity      = 2
+  recurrence            = "0 9 * * *"
+}
+
+output "elb_dns" {
+  value = "${module.webserver_cluster.elb.dns_name}"
+}

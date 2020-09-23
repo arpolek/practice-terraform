@@ -47,8 +47,8 @@ resource "aws_autoscaling_group" "autoscaling-group" {
     load_balancers = ["${aws_elb.elb.name}"]
     health_check_type = "ELB"
 
-    min_size = "${var.min_size}"
-    max_size = "${var.max_size}"
+    #min_size = "${var.min_size}"
+    #max_size = "${var.max_size}"
 
     tag {
         key = "Name"
