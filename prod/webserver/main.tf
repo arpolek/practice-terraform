@@ -32,6 +32,26 @@ resource "aws_autoscaling_schedule" "scale_at_night" {
 
 }
 
+resource "aws_security_group_rule" "allow-http-inbound" {
+    type = "ingress"
+    security_group_id = "${module.webserver_cluster.elb_security_group_id}"
+
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+}
+
+resource "aws_security_group_rule" "allow-all-outbound" {
+    type = "egress"
+    security_group_id = "${module.webserver_cluster.elb_security_group_id}"
+
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+}
+
 output "elb_dns" {
   value = "${module.webserver_cluster.elb_dns_name}"
 }

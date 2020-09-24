@@ -80,20 +80,6 @@ resource "aws_elb" "elb" {
 
 resource "aws_security_group" "security-group-elb" {
     name = "${var.cluster_name}-security-group-elb"
-
-    ingress {
-        from_port = 80
-        to_port = 80
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-
-    egress {
-        from_port = 0
-        to_port = 0
-        protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
 }
 
 output "elb_dns_name" {
@@ -102,4 +88,8 @@ output "elb_dns_name" {
 
 output "asg_name" {
     value = "${aws_autoscaling_group.autoscaling-group.name}"
+}
+
+output "elb_security_group_id" {
+    value = "${aws_security_group.security-group-elb.id}"
 }
